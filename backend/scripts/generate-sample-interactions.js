@@ -7,9 +7,14 @@ const Menu = require('../Models/Menu');
 const User = require('../Models/User');
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb+srv://mhuzaifa:mhuzaifa123@cluster0.aqcuw.mongodb.net/hrms?retryWrites=true&w=majority', {
+mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+}).then(() => {
+  console.log('Connected to MongoDB');
+  generateInteractions();
+}).catch(err => {
+  console.error('❌ Error connecting to MongoDB:', err);
 });
 
 async function generateSampleInteractions() {

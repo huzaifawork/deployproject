@@ -6,13 +6,20 @@ const Table = require('../Models/Table');
 const Menu = require('../Models/Menu');
 require('dotenv').config();
 
-async function masterEnhanceAndTest() {
-  try {
-    console.log('🚀 MASTER SCRIPT: DATABASE ENHANCEMENT & RECOMMENDATION TESTING\n');
-    
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn || 'mongodb://localhost:27017/hrms');
-    console.log('🔗 Connected to MongoDB');
+async function connectToDB() {
+    try {
+        await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log('MongoDB connected successfully.');
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    }
+}
 
+async function enhanceAndTest() {
+    await connectToDB();
+    console.log('--- Running Enhancement Scripts ---');
+    
     // Step 1: Check current state
     console.log('\n=== STEP 1: CURRENT DATABASE STATE ===');
     const initialRoomCount = await Room.countDocuments();
@@ -26,12 +33,8 @@ async function masterEnhanceAndTest() {
 
     // Step 2: Enhance database
     console.log('\n=== STEP 2: ENHANCING DATABASE ===');
-    await mongoose.disconnect(); // Disconnect before running enhance script
     await enhanceAllData();
     
-    // Reconnect
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn || 'mongodb://localhost:27017/hrms');
-
     // Step 3: Verify enhancement
     console.log('\n=== STEP 3: VERIFYING ENHANCEMENT ===');
     const finalRoomCount = await Room.countDocuments();
@@ -76,56 +79,17 @@ async function masterEnhanceAndTest() {
       console.log(`   ${cat._id}: ${cat.count} items`);
     });
 
-    // Step 4: Test recommendation systems
-    console.log('\n=== STEP 4: TESTING RECOMMENDATION SYSTEMS ===');
-    await mongoose.disconnect(); // Disconnect before running test script
-    await testRecommendationSystems();
-
-    // Step 5: Final verification
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn || 'mongodb://localhost:27017/hrms');
-    console.log('\n=== STEP 5: FINAL VERIFICATION ===');
-    
-    // Check if recommendation models have data
-    const RoomRecommendation = require('../Models/RoomRecommendation');
-    const TableRecommendation = require('../Models/TableRecommendation');
-    const FoodRecommendation = require('../Models/FoodRecommendation');
-    
-    const roomRecCount = await RoomRecommendation.countDocuments();
-    const tableRecCount = await TableRecommendation.countDocuments();
-    const foodRecCount = await FoodRecommendation.countDocuments();
-    
-    console.log('📈 Recommendation Data:');
-    console.log(`   Room Recommendations: ${roomRecCount}`);
-    console.log(`   Table Recommendations: ${tableRecCount}`);
-    console.log(`   Food Recommendations: ${foodRecCount}`);
-
-    // Summary
-    console.log('\n=== SUMMARY ===');
-    console.log('✅ Database Enhancement: COMPLETED');
-    console.log(`   - Rooms expanded to ${finalRoomCount} (target: 20+)`);
-    console.log(`   - Tables expanded to ${finalTableCount} (target: 20+)`);
-    console.log(`   - Menu items expanded to ${finalMenuCount} (target: 25+)`);
-    console.log('✅ Recommendation Testing: COMPLETED');
-    console.log('   - Room recommendations: Tested for existing & new users');
-    console.log('   - Table recommendations: Tested with contextual factors');
-    console.log('   - Food recommendations: Tested with user history');
-    console.log('✅ 1-Month History Tracking: VERIFIED');
-    console.log('   - All systems use 30-day interaction history');
-    console.log('   - New users get popularity-based recommendations');
-    console.log('   - Existing users get personalized recommendations');
-
-    console.log('\n🎉 MASTER SCRIPT COMPLETED SUCCESSFULLY!');
-    console.log('🔗 All three recommendation systems are now enhanced and tested');
-    console.log('📊 Database contains comprehensive data for all categories');
-    console.log('🤖 ML models and hybrid algorithms are working correctly');
-
-  } catch (error) {
-    console.error('❌ Master script error:', error);
-  } finally {
+    // Disconnect after enhancement
     await mongoose.disconnect();
-    console.log('\n🔌 Disconnected from MongoDB');
-    console.log('📝 Check the logs above for detailed results');
-  }
+    console.log('Disconnected from MongoDB after enhancement.');
+
+    console.log('\\n--- Running Test Scripts ---');
+    await connectToDB(); // Reconnect for testing
+    await testRecommendationSystems();
+    
+    // Final disconnect
+    await mongoose.disconnect();
+    console.log('Disconnected from MongoDB after testing.');
 }
 
 // Helper function to check if server is running
@@ -153,11 +117,11 @@ async function runWithServerCheck() {
     console.log('🚀 Proceeding with full testing...\n');
   }
   
-  await masterEnhanceAndTest();
+  await enhanceAndTest();
 }
 
 if (require.main === module) {
   runWithServerCheck();
 }
 
-module.exports = { masterEnhanceAndTest };
+module.exports = { enhanceAndTest };

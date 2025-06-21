@@ -9,8 +9,9 @@ require('dotenv').config();
 
 async function generateFinalReport() {
   try {
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn || 'mongodb://localhost:27017/hrms');
-    console.log('🔗 Connected to MongoDB');
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('MongoDB connected successfully.');
 
     console.log('\n' + '='.repeat(80));
     console.log('🎉 COMPREHENSIVE RECOMMENDATION SYSTEM ANALYSIS REPORT');

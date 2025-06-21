@@ -36,7 +36,8 @@ const sampleInteractions = [
 async function createTestInteractions() {
   try {
     console.log('🔗 Connecting to MongoDB...');
-    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/hrms');
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('MongoDB connected successfully for room recommendation testing.');
 
     // Get available rooms
     const rooms = await Room.find({});

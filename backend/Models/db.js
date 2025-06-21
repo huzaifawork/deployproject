@@ -2,9 +2,12 @@ const mongoose = require('mongoose');
 const UserModel = require('./User');
 const bcrypt = require('bcrypt');
 
-const mongo_url = process.env.Mongo_Conn;
+const mongo_url = process.env.MONGO_URI;
 
-mongoose.connect(mongo_url)
+mongoose.connect(mongo_url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(() => {
         console.log("Connected to MongoDB");
         createDefaultAdmin();

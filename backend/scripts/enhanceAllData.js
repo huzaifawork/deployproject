@@ -563,7 +563,7 @@ const additionalMenuItems = [
 
 async function enhanceAllData() {
   try {
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn || 'mongodb://localhost:27017/hrms');
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log('🔗 Connected to MongoDB');
 
     console.log('\n=== ENHANCING DATABASE WITH MORE DATA ===\n');

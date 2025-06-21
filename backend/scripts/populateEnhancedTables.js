@@ -224,8 +224,7 @@ const enhancedTables = [
 
 const populateEnhancedTables = async () => {
   try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log('🔗 Connected to MongoDB');
 
     // Clear existing tables

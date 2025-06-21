@@ -4,7 +4,7 @@ require('dotenv').config();
 // Import the Table model
 const Table = require('../Models/Table');
 
-const mongo_url = process.env.Mongo_Conn;
+const mongo_url = process.env.MONGO_URI;
 
 const sampleTables = [
   {

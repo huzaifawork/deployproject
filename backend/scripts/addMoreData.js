@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Room = require('../Models/Room');
 const Table = require('../Models/Table');
 const Menu = require('../Models/Menu');
+const User = require('../Models/User');
 require('dotenv').config();
 
 // Additional 10 rooms to reach 20 total
@@ -798,8 +799,11 @@ const moreMenuItems = [
 
 async function addMoreData() {
   try {
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn || 'mongodb://localhost:27017/hrms');
-    console.log('🔗 Connected to MongoDB');
+    // Connect to MongoDB
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('MongoDB connected successfully.');
+
+    const users = await User.find();
 
     console.log('\n=== ADDING MORE DATA TO REACH TARGETS ===\n');
 

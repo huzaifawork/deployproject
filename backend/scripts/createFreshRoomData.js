@@ -298,7 +298,7 @@ async function createFreshRoomData() {
     console.log('🏨 Creating Fresh Room Data with Complete Field Alignment...\n');
     
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI || process.env.Mongo_Conn);
+    await mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
     console.log('🔗 Connected to MongoDB');
 
     // Clear ALL existing room-related data
