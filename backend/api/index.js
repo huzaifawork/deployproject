@@ -2,6 +2,10 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const connectDB = require("../config/db");
+
+// Connect to Database
+connectDB();
 
 // Import the main app configuration
 const app = express();
@@ -28,9 +32,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-
-// Import database connection
-require("../Models/db");
 
 // Import routes
 const menuRoutes = require("../Routes/menuRoutes");

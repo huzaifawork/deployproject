@@ -5,7 +5,7 @@ const path = require("path");
 const fs = require("fs");
 const { spawn } = require("child_process");
 require("dotenv").config();
-require("./Models/db");
+const connectDB = require("./config/db");
 
 // Initialize ML models
 const mlModelLoader = require('./utils/mlModelLoader');
@@ -233,140 +233,155 @@ tableMLLoader.loadModels().then(success => {
   }
 });
 
-const app = express();
-const server = http.createServer(app);
+const startServer = async () => {
+  // Connect to the database
+  await connectDB();
 
-// Import and initialize socket.io
-const socketModule = require('./socket');
-const io = socketModule.init(server);
-
-// Secure CORS Setup for Production
-const allowedOrigins = [
-  process.env.FRONTEND_URL, // Your deployed frontend URL
-  'http://localhost:3000'     // For local development
-];
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-};
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-// 📌 Import Routes
-const menuRoutes = require("./Routes/menuRoutes");
-const fileRoutes = require("./Routes/PicRoutes");
-const tableRoutes = require("./Routes/tableRoutes");
-const roomRoutes = require("./Routes/roomRoutes");
-const staffRoutes = require("./Routes/staffRoutes");
-const shiftRoutes = require("./Routes/shiftroutes");
-const AuthRouter = require("./Routes/AuthRouter");
-const ProductRouter = require("./Routes/ProductRouter");
-const GoogleRoutes = require("./Routes/GoogleRoutes");
-const bookingRoutes = require("./Routes/bookingRoutes");
-const orderRoutes = require("./Routes/orderRoutes");
-const reservationRoutes = require("./Routes/ReservationRoutes");
-const userRoutes = require("./Routes/UserRoutes");
-const feedbackRoutes = require("./Routes/feedbackRoutes");
-const adminRoutes = require('./Routes/AdminRoutes');
-const paymentRoutes = require('./Routes/paymentRoutes');
-const recommendationRoutes = require('./Routes/recommendationRoutes');
-const fixImagesRoute = require('./Routes/fixImagesRoute');
-
-// 📌 Serve Uploaded Files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// 🔹 Register Routes
-app.use("/api/menus", menuRoutes);
-app.use("/api/files", fileRoutes);
-app.use("/api/tables", tableRoutes);
-app.use("/api/rooms", roomRoutes);
-app.use("/api/staff", staffRoutes);
-app.use("/api/shift", shiftRoutes);
-app.use("/auth", AuthRouter);
-app.use("/api/products", ProductRouter);
-app.use("/auth/google", GoogleRoutes);
-app.use("/api/bookings", bookingRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/reservations", reservationRoutes);
-app.use("/api/table-reservations", reservationRoutes); // Alias for frontend compatibility
-app.use("/api/user", userRoutes);
-app.use("/api/feedback", feedbackRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/payment", paymentRoutes);
-app.use("/api/food-recommendations", recommendationRoutes);
-app.use("/api/table-recommendations", tableRoutes); // Table recommendations use same routes as tables
-app.use("/api/fix", fixImagesRoute);
-
-// Health check route to test the server
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    message: 'Server is running'
+  const app = express();
+  const server = http.createServer(app);
+  
+  // Initialize Socket.IO
+  const io = require('./socket').init(server, {
+      cors: {
+          origin: process.env.FRONTEND_URL || "http://localhost:3000",
+          methods: ["GET", "POST"]
+      }
   });
-});
 
-// API status endpoint for debugging
-app.get('/api/status', (req, res) => {
-  const endpoints = [
-    '/api/rooms',
-    '/api/orders',
-    '/api/menus',
-    '/api/bookings',
-    '/api/reservations',
-    '/api/table-reservations',
-    '/api/tables',
-    '/api/feedback/analytics',
-    '/api/admin/dashboard/analytics'
+  // Secure CORS Setup for Production
+  const allowedOrigins = [
+      process.env.FRONTEND_URL, // Your deployed frontend URL
+      'http://localhost:3000',     // For local development
+      'http://localhost:3001'      // Sometimes create-react-app uses 3001
   ];
 
-  res.status(200).json({
-    status: 'ok',
-    message: 'Hotel Management System API',
-    version: '1.0.0',
-    timestamp: new Date().toISOString(),
-    availableEndpoints: endpoints,
-    features: {
-      authentication: 'JWT',
-      database: 'MongoDB',
-      fileUpload: 'Multer',
-      recommendations: 'ML-powered',
-      analytics: 'Real-time'
-    }
-  });
-});
+  const corsOptions = {
+      origin: (origin, callback) => {
+          if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+              callback(null, true);
+          } else {
+              callback(new Error('Not allowed by CORS'));
+          }
+      },
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true,
+  };
 
-// ML Model info endpoint
-app.get('/api/ml-info', (req, res) => {
-  const modelInfo = mlModelLoader.getModelInfo();
-  res.status(200).json({
-    success: true,
-    mlSystem: modelInfo,
-    timestamp: new Date().toISOString()
-  });
-});
+  app.use(cors(corsOptions));
+  app.use(express.json());
 
-// 🔹 Start Server
-const PORT = process.env.PORT || 8080;
-server.listen(PORT, () => {
-  console.log(`🌍 Server running on port ${PORT}`);
-});
+  // Create uploads directory if it doesn't exist
+  const uploadsDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+
+  // 📌 Import Routes
+  const menuRoutes = require("./Routes/menuRoutes");
+  const fileRoutes = require("./Routes/PicRoutes");
+  const tableRoutes = require("./Routes/tableRoutes");
+  const roomRoutes = require("./Routes/roomRoutes");
+  const staffRoutes = require("./Routes/staffRoutes");
+  const shiftRoutes = require("./Routes/shiftroutes");
+  const AuthRouter = require("./Routes/AuthRouter");
+  const ProductRouter = require("./Routes/ProductRouter");
+  const GoogleRoutes = require("./Routes/GoogleRoutes");
+  const bookingRoutes = require("./Routes/bookingRoutes");
+  const orderRoutes = require("./Routes/orderRoutes");
+  const reservationRoutes = require("./Routes/ReservationRoutes");
+  const userRoutes = require("./Routes/UserRoutes");
+  const feedbackRoutes = require("./Routes/feedbackRoutes");
+  const adminRoutes = require('./Routes/AdminRoutes');
+  const paymentRoutes = require('./Routes/paymentRoutes');
+  const recommendationRoutes = require('./Routes/recommendationRoutes');
+  const fixImagesRoute = require('./Routes/fixImagesRoute');
+
+  // 📌 Serve Uploaded Files
+  app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+  // 🔹 Register Routes
+  app.use("/api/menus", menuRoutes);
+  app.use("/api/files", fileRoutes);
+  app.use("/api/tables", tableRoutes);
+  app.use("/api/rooms", roomRoutes);
+  app.use("/api/staff", staffRoutes);
+  app.use("/api/shift", shiftRoutes);
+  app.use("/auth", AuthRouter);
+  app.use("/api/products", ProductRouter);
+  app.use("/auth/google", GoogleRoutes);
+  app.use("/api/bookings", bookingRoutes);
+  app.use("/api/orders", orderRoutes);
+  app.use("/api/reservations", reservationRoutes);
+  app.use("/api/table-reservations", reservationRoutes); // Alias for frontend compatibility
+  app.use("/api/user", userRoutes);
+  app.use("/api/feedback", feedbackRoutes);
+  app.use("/api/admin", adminRoutes);
+  app.use("/api/payment", paymentRoutes);
+  app.use("/api/food-recommendations", recommendationRoutes);
+  app.use("/api/table-recommendations", tableRoutes); // Table recommendations use same routes as tables
+  app.use("/api/fix", fixImagesRoute);
+
+  // Health check route to test the server
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      message: 'Server is running'
+    });
+  });
+
+  // API status endpoint for debugging
+  app.get('/api/status', (req, res) => {
+    const endpoints = [
+      '/api/rooms',
+      '/api/orders',
+      '/api/menus',
+      '/api/bookings',
+      '/api/reservations',
+      '/api/table-reservations',
+      '/api/tables',
+      '/api/feedback/analytics',
+      '/api/admin/dashboard/analytics'
+    ];
+
+    res.status(200).json({
+      status: 'ok',
+      message: 'Hotel Management System API',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      availableEndpoints: endpoints,
+      features: {
+        authentication: 'JWT',
+        database: 'MongoDB',
+        fileUpload: 'Multer',
+        recommendations: 'ML-powered',
+        analytics: 'Real-time'
+      }
+    });
+  });
+
+  // ML Model info endpoint
+  app.get('/api/ml-info', (req, res) => {
+    const modelInfo = mlModelLoader.getModelInfo();
+    res.status(200).json({
+      success: true,
+      mlSystem: modelInfo,
+      timestamp: new Date().toISOString()
+    });
+  });
+
+  // 🔹 Start Server
+  const PORT = process.env.PORT || 8080;
+  server.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+    initializeRecommendationSystem();
+    initializeRoomRecommendationSystem();
+    initializeTableRecommendationSystem();
+  });
+};
+
+startServer();
 
 // Graceful shutdown handling
 function gracefulShutdown(signal) {
