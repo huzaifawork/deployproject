@@ -8,6 +8,8 @@ import {
   FiEye, FiEdit, FiTrash, FiToggleLeft, FiToggleRight, FiPlus,
   FiDollarSign, FiStar, FiClock, FiCheck, FiX, FiTrendingUp
 } from "react-icons/fi";
+import { API_ENDPOINTS, API_BASE_URL } from '../../config/api';
+import { getImageUrl } from '../../utils/imageUtils';
 import "./AdminManageRooms.css";
 
 const AdminViewMenus = () => {
@@ -28,8 +30,8 @@ const AdminViewMenus = () => {
     setLoading(true);
     try {
       const url = selectedCategory === "all"
-        ? "http://localhost:8080/api/menus"
-        : `http://localhost:8080/api/menus/category/${selectedCategory}`;
+        ? API_ENDPOINTS.MENUS
+        : API_ENDPOINTS.MENU_BY_CATEGORY(selectedCategory);
       
       const response = await axios.get(url);
       setMenuItems(response.data);

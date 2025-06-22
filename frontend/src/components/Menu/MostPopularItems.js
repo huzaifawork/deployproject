@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FiStar, FiInfo, FiShoppingCart, FiClock, FiThermometer, FiHeart } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { API_ENDPOINTS, API_BASE_URL } from '../../config/api';
+import { getImageUrl } from '../../utils/imageUtils';
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const MostPopularItems = () => {
@@ -9,25 +11,13 @@ const MostPopularItems = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "/images/placeholder-food.jpg";
-    try {
-      if (imagePath.startsWith("http")) return imagePath;
-      const cleanPath = imagePath.replace(/^\/+/, "");
-      return cleanPath.includes("uploads")
-        ? `http://localhost:8080/${cleanPath}`
-        : `http://localhost:8080/uploads/${cleanPath}`;
-    } catch (error) {
-      console.error("Error formatting image URL:", error);
-      return "/images/placeholder-food.jpg";
-    }
-  };
+
 
   // Fetch menu items
   useEffect(() => {
     const fetchMenuItems = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/menus");
+        const response = await axios.get(API_ENDPOINTS.MENUS);
         // Get top 3 items with highest ratings/popularity
         const topItems = response.data
           .sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5))

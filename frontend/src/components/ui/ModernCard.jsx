@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
 import { FiStar, FiMapPin, FiClock, FiUsers, FiWifi, FiCoffee, FiTv, FiCar } from 'react-icons/fi';
+import { API_BASE_URL } from '../../config/api';
 import './ModernCard.css';
 
 const ModernCard = ({ 
@@ -23,7 +24,7 @@ const ModernCard = ({
       return placeholders[type] || placeholders.food;
     }
     if (imagePath.startsWith('http')) return imagePath;
-    return `http://localhost:8080${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
+    return `${API_BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
   };
 
   const getAmenityIcon = (amenity) => {

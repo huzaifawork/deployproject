@@ -224,14 +224,22 @@ async function initializeRoomRecommendationSystem() {
 // Initialize room recommendation system
 initializeRoomRecommendationSystem();
 
-// Load table recommendation models
-tableMLLoader.loadModels().then(success => {
+// Initialize table recommendation system
+async function initializeTableRecommendationSystem() {
+  console.log('🍽️ Initializing Table Recommendation System...');
+
+  const success = await tableMLLoader.loadModels();
   if (success) {
     console.log('🍽️ Table Recommendation System initialized successfully!');
   } else {
     console.log('⚠️ Table Recommendation System failed to initialize, using fallback mode');
   }
-});
+
+  return success;
+}
+
+// Load table recommendation models
+initializeTableRecommendationSystem();
 
 const startServer = async () => {
   // Connect to the database

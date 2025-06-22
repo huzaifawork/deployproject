@@ -7,6 +7,8 @@ import EditReservation from "../components/User/EditReservation";
 import TableRecommendations from "../components/tables/TableRecommendations";
 import { tableRecommendationService } from "../services/tableRecommendationService";
 import "./ReserveTable.css";
+import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ReserveTable = () => {
   const navigate = useNavigate();
@@ -32,20 +34,6 @@ const ReserveTable = () => {
   // Extract the edit reservation ID from URL query parameters (if it exists)
   const queryParams = new URLSearchParams(location.search);
   const editReservationId = queryParams.get('edit');
-
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "/images/placeholder-table.jpg";
-    try {
-      if (imagePath.startsWith("http")) return imagePath;
-      const cleanPath = imagePath.replace(/^\/+/, "");
-      return cleanPath.includes("uploads")
-        ? `http://localhost:8080/${cleanPath}`
-        : `http://localhost:8080/uploads/${cleanPath}`;
-    } catch (error) {
-      console.error("Error formatting image URL:", error);
-      return "/images/placeholder-table.jpg";
-    }
-  };
 
   useEffect(() => {
     fetchTables();
@@ -81,11 +69,11 @@ const ReserveTable = () => {
     // Check availability for specific date/time
     if (reservationData.date && reservationData.time && filters.availability) {
       try {
-        const response = await axios.get(`http://localhost:8080/api/tables/availability`, {
+        const response = await axios.get(API_ENDPOINTS.TABLE_AVAILABILITY, {
           params: {
-            reservationDate: reservationData.date,
+            date: reservationData.date,
             time: reservationData.time,
-            endTime: calculateEndTime(reservationData.time)
+            guests: reservationData.guests
           }
         });
 
@@ -112,7 +100,7 @@ const ReserveTable = () => {
 
   const fetchTables = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/api/tables");
+      const response = await axios.get(API_ENDPOINTS.TABLES);
       setTables(response.data);
     } catch (error) {
       setError("Failed to load tables. Please try again later.");
@@ -197,11 +185,11 @@ const ReserveTable = () => {
 
     // Check for double booking
     try {
-      const response = await axios.get(`http://localhost:8080/api/tables/availability`, {
+      const response = await axios.get(API_ENDPOINTS.TABLE_AVAILABILITY, {
         params: {
-          reservationDate: reservationData.date,
+          date: reservationData.date,
           time: reservationData.time,
-          endTime: calculateEndTime(reservationData.time)
+          guests: reservationData.guests
         }
       });
 

@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+import { API_BASE_URL } from '../config/api';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -139,7 +138,7 @@ export const tableService = {
   // Get all tables
   getAllTables: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/tables`);
+      const response = await api.get('/tables');
       return response.data;
     } catch (error) {
       console.error('Error getting tables:', error);
@@ -150,7 +149,7 @@ export const tableService = {
   // Check table availability
   checkAvailability: async (params) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/tables/availability`, { params });
+      const response = await api.get('/tables/availability', { params });
       return response.data;
     } catch (error) {
       console.error('Error checking table availability:', error);
@@ -223,8 +222,8 @@ export const tableUtils = {
       if (imagePath.startsWith("http")) return imagePath;
       const cleanPath = imagePath.replace(/^\/+/, "");
       return cleanPath.includes("uploads")
-        ? `http://localhost:8080/${cleanPath}`
-        : `http://localhost:8080/uploads/${cleanPath}`;
+        ? `${API_BASE_URL}/${cleanPath}`
+        : `${API_BASE_URL}/uploads/${cleanPath}`;
     } catch (error) {
       console.error("Error formatting image URL:", error);
       return "/images/placeholder-table.jpg";

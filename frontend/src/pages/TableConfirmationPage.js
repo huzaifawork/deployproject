@@ -7,6 +7,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import PageLayout from '../components/layout/PageLayout';
 import './TableConfirmationPage.css';
+import { API_ENDPOINTS } from '../config/api';
 
 const TableConfirmationPage = () => {
   const location = useLocation();
@@ -54,7 +55,7 @@ const TableConfirmationPage = () => {
           }
 
           const response = await axios.get(
-            `http://localhost:8080/api/reservations/${reservationId}`,
+            API_ENDPOINTS.RESERVATION_BY_ID(reservationId),
             {
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -93,7 +94,7 @@ const TableConfirmationPage = () => {
       if (!token) return;
 
       const userResponse = await axios.get(
-        `http://localhost:8080/api/user/profile`,
+        API_ENDPOINTS.USER_PROFILE,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FiCalendar, FiUser, FiMail, FiPhone, FiClock, FiStar, FiCreditCard } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
+import { getImageUrl } from '../utils/imageUtils';
 import PageLayout from '../components/layout/PageLayout';
 import './TableReservationPage.css';
 
@@ -107,20 +109,6 @@ const TableReservationPage = () => {
   });
   const [showPaymentForm, setShowPaymentForm] = useState(false);
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "/images/placeholder-table.jpg";
-    try {
-      if (imagePath.startsWith("http")) return imagePath;
-      const cleanPath = imagePath.replace(/^\/+/, "");
-      return cleanPath.includes("uploads")
-        ? `http://localhost:8080/${cleanPath}`
-        : `http://localhost:8080/uploads/${cleanPath}`;
-    } catch (error) {
-      console.error("Error formatting image URL:", error);
-      return "/images/placeholder-table.jpg";
-    }
-  };
-
   useEffect(() => {
     const storedDetails = localStorage.getItem('reservationDetails');
     if (!storedDetails) {
@@ -203,9 +191,9 @@ const TableReservationPage = () => {
       
       setAvailability({ ...availability, isChecking: true });
       
-      const response = await axios.get(`http://localhost:8080/api/tables/availability`, {
+      const response = await axios.get(API_ENDPOINTS.TABLE_AVAILABILITY, {
         params: {
-          reservationDate: formData.date,
+          date: formData.date,
           time: formData.time,
           endTime: formData.endTime
         }
@@ -291,8 +279,9 @@ const TableReservationPage = () => {
 
       console.log("Sending reservation data:", reservationData);
 
-      const response = await axios.post('http://localhost:8080/api/reservations', reservationData, {
+      const response = await axios.post(API_ENDPOINTS.RESERVATIONS, reservationData, {
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
@@ -302,7 +291,7 @@ const TableReservationPage = () => {
         try {
           const userId = localStorage.getItem('userId');
           if (userId && tableDetails.tableId) {
-            await axios.post('http://localhost:8080/api/tables/track-reservation', {
+            await axios.post(API_ENDPOINTS.TRACK_RESERVATION, {
               tableId: tableDetails.tableId,
               reservationId: response.data.reservation._id,
               userId: userId

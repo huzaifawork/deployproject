@@ -5,6 +5,8 @@ import { FiCalendar, FiUser, FiMail, FiPhone, FiCreditCard, FiStar, FiMapPin, Fi
 import { toast } from 'react-hot-toast';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { API_ENDPOINTS, API_BASE_URL } from '../config/api';
+import { getImageUrl } from '../utils/imageUtils';
 
 // Initialize Stripe
 const stripePromise = loadStripe('pk_test_51RQDO0QHBrXA72xgYssbECOe9bubZ2bWHA4m0T6EY6AvvmAfCzIDmKUCkRjpwVVIJ4IMaOiQBUawECn5GD8ADHbn00GRVmjExI');
@@ -113,19 +115,7 @@ const BookingPage = () => {
   });
   const [showPayment, setShowPayment] = useState(false);
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/placeholder-room.jpg';
-    try {
-      if (imagePath.startsWith('http')) return imagePath;
-      const cleanPath = imagePath.replace(/^\/+/, '');
-      return cleanPath.includes('uploads') 
-        ? `http://localhost:8080/${cleanPath}`
-        : `http://localhost:8080/uploads/${cleanPath}`;
-    } catch (error) {
-      console.error('Error formatting image URL:', error);
-      return '/images/placeholder-room.jpg';
-    }
-  };
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -151,17 +141,17 @@ const BookingPage = () => {
         setError(null);
 
         // Fetch room details
-        const roomResponse = await axios.get('http://localhost:8080/api/rooms', {
+        const roomResponse = await axios.get(API_ENDPOINTS.ROOMS, {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            'Authorization': `Bearer ${token}`
+          }
         });
 
         // Fetch user profile data to pre-fill the form
-        const userResponse = await axios.get('http://localhost:8080/api/user/profile', {
+        const userResponse = await axios.get(API_ENDPOINTS.USER_PROFILE, {
           headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            'Authorization': `Bearer ${token}`
+          }
         }).catch(error => {
           console.warn('Could not fetch user profile:', error);
           return { data: {} }; // Return empty data if profile fetch fails
@@ -363,8 +353,11 @@ const BookingPage = () => {
         numberOfNights: bookingSummary.nights
       };
 
-      const response = await axios.post('http://localhost:8080/api/bookings', bookingData, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await axios.post(API_ENDPOINTS.BOOKINGS, bookingData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (response.data) {
