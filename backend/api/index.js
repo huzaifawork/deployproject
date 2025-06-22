@@ -1,11 +1,8 @@
-// Vercel serverless function entry point
+// Railway deployment entry point
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("../config/db");
-
-// Connect to Database
-connectDB();
 
 // Import the main app configuration
 const app = express();
@@ -78,7 +75,7 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    message: 'Serverless function is running'
+    message: 'Railway backend is running'
   });
 });
 
@@ -86,12 +83,44 @@ app.get('/api/health', (req, res) => {
 app.get('/api/status', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    message: 'Hotel Management System API - Serverless',
+    message: 'Hotel Management System API - Railway',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     environment: 'production'
   });
 });
 
-// Export for Vercel
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).json({
+    message: 'Hotel Management System API',
+    status: 'running',
+    endpoints: {
+      health: '/api/health',
+      status: '/api/status'
+    }
+  });
+});
+
+// Start server for Railway
+const PORT = process.env.PORT || 8080;
+
+const startServer = async () => {
+  try {
+    // Connect to database
+    await connectDB();
+    
+    // Start the server
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
+
 module.exports = app;
