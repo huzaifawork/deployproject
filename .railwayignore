@@ -1,0 +1,11 @@
+# Ignore frontend files for Railway deployment
+frontend/
+docs/
+*.md
+*.txt
+*.bat
+*.js
+!backend/**/*.js
+node_modules/
+.git/
+.gitignore 
