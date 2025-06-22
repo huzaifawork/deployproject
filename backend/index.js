@@ -251,7 +251,7 @@ const startServer = async () => {
   // Initialize Socket.IO
   const io = require('./socket').init(server, {
       cors: {
-          origin: process.env.FRONTEND_URL || "http://localhost:3000",
+          origin: process.env.FRONTEND_URL || "https://deployproject-1zl2.vercel.app/",
           methods: ["GET", "POST"]
       }
   });
@@ -259,7 +259,7 @@ const startServer = async () => {
   // Secure CORS Setup for Production
   const allowedOrigins = [
       process.env.FRONTEND_URL, // Your deployed frontend URL
-      'https://your-vercel-app.vercel.app', // Add your Vercel URL here after deployment
+      'https://deployproject-1zl2.vercel.app/', // Add your Vercel URL here after deployment
       'http://localhost:3000',     // For local development
       'http://localhost:3001'      // Sometimes create-react-app uses 3001
   ];
