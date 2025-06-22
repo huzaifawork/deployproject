@@ -5,6 +5,7 @@ import { FiSearch, FiShoppingCart } from "react-icons/fi";
 import PersonalizedRecommendations from '../components/recommendations/PersonalizedRecommendations';
 import RecommendationCard from '../components/recommendations/RecommendationCard';
 import { recommendationAPI, recommendationHelpers } from '../api/recommendations';
+import { API_ENDPOINTS } from '../config/api';
 import Header from "../components/common/Header";
 import '../styles/simple-theme.css';
 import '../styles/OrderFood.css';
@@ -26,7 +27,7 @@ export default function OrderFood() {
     useEffect(() => {
         const fetchMenuItems = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/menus');
+                const response = await axios.get(API_ENDPOINTS.MENUS);
                 setMenuItems(response.data);
                 setFilteredItems(response.data);
                 

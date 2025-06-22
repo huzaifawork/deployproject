@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FiStar, FiWifi, FiCoffee, FiTv, FiHeart, FiTrendingUp, FiShoppingCart, FiEye } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { API_ENDPOINTS } from '../../config/api';
+import { getImageUrl } from '../../utils/imageUtils';
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const Rooms = () => {
@@ -14,19 +16,7 @@ const Rooms = () => {
   const [user, setUser] = useState(null);
   const [hoveredRoom, setHoveredRoom] = useState(null);
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return "/images/placeholder-room.jpg";
-    try {
-      if (imagePath.startsWith("http")) return imagePath;
-      const cleanPath = imagePath.replace(/^\/+/, "");
-      return cleanPath.includes("uploads")
-        ? `http://localhost:8080/${cleanPath}`
-        : `http://localhost:8080/uploads/${cleanPath}`;
-    } catch (error) {
-      console.error("Error formatting image URL:", error);
-      return "/images/placeholder-room.jpg";
-    }
-  };
+
 
   // Check if user is logged in
   useEffect(() => {
@@ -46,7 +36,7 @@ const Rooms = () => {
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/rooms");
+        const response = await axios.get(API_ENDPOINTS.ROOMS);
 
         setRooms(response.data);
       } catch (error) {
@@ -64,7 +54,7 @@ const Rooms = () => {
   useEffect(() => {
     const fetchPopularRooms = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/rooms/popular?count=6');
+        const response = await axios.get(`${API_ENDPOINTS.ROOMS}/popular?count=6`);
         if (response.data.success) {
           console.log('Fetched popular rooms:', response.data.popularRooms.length, response.data.popularRooms);
           setPopularRooms(response.data.popularRooms);
@@ -84,7 +74,7 @@ const Rooms = () => {
 
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/rooms/recommendations/${user.id}?count=6`,
+          `${API_ENDPOINTS.ROOMS}/recommendations/${user.id}?count=6`,
           {
             headers: { Authorization: `Bearer ${user.token}` }
           }

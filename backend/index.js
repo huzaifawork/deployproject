@@ -259,6 +259,7 @@ const startServer = async () => {
   // Secure CORS Setup for Production
   const allowedOrigins = [
       process.env.FRONTEND_URL, // Your deployed frontend URL
+      'https://your-vercel-app.vercel.app', // Add your Vercel URL here after deployment
       'http://localhost:3000',     // For local development
       'http://localhost:3001'      // Sometimes create-react-app uses 3001
   ];
