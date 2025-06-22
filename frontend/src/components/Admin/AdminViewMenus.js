@@ -44,7 +44,7 @@ const AdminViewMenus = () => {
 
   const handleDeleteItem = async (id) => {
     try {
-      await axios.delete(`http://localhost:8080/api/menus/${id}`);
+      await axios.delete(API_ENDPOINTS.MENU_BY_ID(id));
       setMenuItems(menuItems.filter(item => item._id !== id));
       toast.success("Menu item deleted successfully");
       setShowDeleteModal(false);
@@ -55,7 +55,7 @@ const AdminViewMenus = () => {
 
   const handleAvailabilityToggle = async (id, currentStatus) => {
     try {
-      const response = await axios.patch(`http://localhost:8080/api/menus/${id}/toggle-availability`);
+      const response = await axios.patch(`${API_BASE_URL}/api/menus/${id}/toggle-availability`);
       setMenuItems(menuItems.map(item => item._id === id ? response.data : item));
       toast.success("Availability updated successfully");
     } catch (error) {
@@ -63,24 +63,7 @@ const AdminViewMenus = () => {
     }
   };
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return '/images/placeholder-menu.jpg';
-    try {
-      // If it's already a full URL (Unsplash, etc.), return as is
-      if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-        return imagePath;
-      }
-      // If it's a local upload path
-      const cleanPath = imagePath.replace(/^\/+/, '');
-      if (cleanPath.includes('uploads')) {
-        return `http://localhost:8080/${cleanPath}`;
-      }
-      return `http://localhost:8080/uploads/${cleanPath}`;
-    } catch (error) {
-      console.error('Error formatting image URL:', error);
-      return '/images/placeholder-menu.jpg';
-    }
-  };
+
 
   // Filter and sort menu items
   const filteredMenuItems = menuItems.filter(item => {
