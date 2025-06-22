@@ -1,5 +1,6 @@
 // API Base URL - fallback to Railway if not provided
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://web-production-3f45.up.railway.app';
+// This handles both REACT_APP_API_URL and REACT_APP_API_BASE_URL for backward compatibility
+const API_BASE_URL = process.env.REACT_APP_API_URL || process.env.REACT_APP_API_BASE_URL || 'https://web-production-3f45.up.railway.app';
 
 // All API endpoints as named export
 export const API_ENDPOINTS = {

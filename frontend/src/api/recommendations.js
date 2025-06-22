@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+// Use the same environment variable as in your config and provide fallback
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://web-production-3f45.up.railway.app';
 
 // Create axios instance with default config
 const api = axios.create({

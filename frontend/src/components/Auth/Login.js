@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiUser, FiEye, FiEyeOff,  FiShield, FiCheckCircle } from "react-icons/fi";
+import { API_BASE_URL } from "../../config/api";
 import "./Login.css";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL.replace('/api', '');
+// Remove /api suffix if present for auth endpoints
+const AUTH_BASE_URL = API_BASE_URL.replace('/api', '');
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);

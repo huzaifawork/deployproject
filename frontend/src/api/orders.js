@@ -1,11 +1,13 @@
 import axios from "axios";
 
-const API_URL = process.env.REACT_APP_API_BASE_URL + "/orders"; // Backend URL
+// Use the same environment variable as in your config and provide fallback
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://web-production-3f45.up.railway.app';
+const API_URL = API_BASE_URL + "/orders"; // Backend URL
 
 // ✅ Fetch menu items (from admin-side menus)
 export const fetchMenuItems = async () => {
   try {
-    const response = await axios.get(process.env.REACT_APP_API_BASE_URL + "/menus");
+    const response = await axios.get(API_BASE_URL + "/menus");
     return response.data;
   } catch (error) {
     console.error("Error fetching menu:", error);
