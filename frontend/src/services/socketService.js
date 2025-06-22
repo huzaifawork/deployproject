@@ -1,7 +1,8 @@
 // src/services/socketService.js
-import io from 'socket.io-client';
+import { io } from "socket.io-client";
+import API_BASE_URL from '../config/api';
 
-const SOCKET_SERVER = "http://localhost:8080";
+const SOCKET_SERVER = API_BASE_URL;
 
 let socketInstance = null;
 let activeCallbacks = new Set();

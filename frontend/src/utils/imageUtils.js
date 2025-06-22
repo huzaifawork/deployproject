@@ -3,30 +3,41 @@
  * Supports both external URLs (Unsplash, etc.) and local uploads
  */
 
-export const getImageUrl = (imagePath, fallback = "/images/placeholder-food.jpg") => {
-  if (!imagePath) return fallback;
-  const IMAGE_BASE_URL = process.env.REACT_APP_IMAGE_BASE_URL;
-  try {
-    // If it's already a full URL (Unsplash, external sources), return as is
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    
-    // If it's a local upload path
-    const cleanPath = imagePath.replace(/^\/\/+/, '');
-    
-    // Check if it already includes uploads in the path
-    if (cleanPath.includes('uploads')) {
-      return `${IMAGE_BASE_URL}/${cleanPath}`;
-    }
-    
-    // Default to uploads folder
-    return `${IMAGE_BASE_URL}/uploads/${cleanPath}`;
-    
-  } catch (error) {
-    console.error('Error formatting image URL:', error);
-    return fallback;
+import API_BASE_URL from '../config/api';
+
+export const getImageUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
   }
+  
+  // Clean the path (remove leading slash if present)
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  
+  // If it's an uploads path, use the uploads endpoint
+  if (cleanPath.startsWith('uploads/')) {
+    return `${API_BASE_URL}/${cleanPath}`;
+  }
+  
+  // Otherwise, use the main API base URL
+  return `${API_BASE_URL}/${cleanPath}`;
+};
+
+export const getUploadsUrl = (imagePath) => {
+  if (!imagePath) return null;
+  
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // Clean the path (remove leading slash if present)
+  const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath;
+  
+  // Always use the uploads endpoint
+  return `${API_BASE_URL}/uploads/${cleanPath}`;
 };
 
 /**

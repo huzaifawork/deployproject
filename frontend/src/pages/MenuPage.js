@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiShoppingCart, FiStar, FiClock, FiTag, FiInfo } from 'react-icons/fi';
 import axios from 'axios';
+import { API_ENDPOINTS } from '../config/api';
+import { getImageUrl } from '../utils/imageUtils';
 import PageLayout from '../components/layout/PageLayout';
 import '../styles/theme.css';
+import { toast } from 'react-hot-toast';
 
 const MenuPage = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -19,24 +22,25 @@ const MenuPage = () => {
   });
 
   useEffect(() => {
-    fetchMenuData();
+    const fetchMenu = async () => {
+      try {
+        const menuResponse = await axios.get(API_ENDPOINTS.MENUS);
+        setMenuItems(menuResponse.data);
+
+        // Extract unique categories from menu items
+        const uniqueCategories = [...new Set(menuResponse.data.map(item => item.category))];
+        setCategories(uniqueCategories.map(cat => ({ _id: cat, name: cat })));
+
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching menu:', error);
+        setError('Failed to load menu. Please try again later.');
+        setLoading(false);
+      }
+    };
+
+    fetchMenu();
   }, []);
-
-  const fetchMenuData = async () => {
-    try {
-      const menuResponse = await axios.get('http://localhost:8080/api/menus');
-      setMenuItems(menuResponse.data);
-
-      // Extract unique categories from menu items
-      const uniqueCategories = [...new Set(menuResponse.data.map(item => item.category))];
-      setCategories(uniqueCategories.map(cat => ({ _id: cat, name: cat })));
-
-      setLoading(false);
-    } catch (error) {
-      setError('Failed to load menu. Please try again later.');
-      setLoading(false);
-    }
-  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -83,10 +87,11 @@ const MenuPage = () => {
 
   const addToCart = async (itemId) => {
     try {
-      await axios.post('http://localhost:8080/api/cart', { itemId });
-      // Show success notification
+      await axios.post(API_ENDPOINTS.CART, { itemId });
+      toast.success('Item added to cart!');
     } catch (error) {
-      // Show error notification
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add item to cart');
     }
   };
 
@@ -106,7 +111,18 @@ const MenuPage = () => {
         <div className="error-state">
           <FiInfo className="error-icon" />
           <h3>{error}</h3>
-          <button onClick={fetchMenuData} className="retry-button">
+          <button onClick={() => {
+            const fetchMenu = async () => {
+              try {
+                const menuResponse = await axios.get(API_ENDPOINTS.MENUS);
+                setMenuItems(menuResponse.data);
+              } catch (error) {
+                console.error('Error fetching menu:', error);
+              }
+            };
+
+            fetchMenu();
+          }} className="retry-button">
             Try Again
           </button>
         </div>
@@ -227,10 +243,10 @@ const MenuPage = () => {
             <div key={item._id} className="menu-card">
               <div className="menu-item-image">
                 <img
-                  src={item.image || "/placeholder-food.jpg"}
+                  src={getImageUrl(item.image) || "/images/placeholder-food.jpg"}
                   alt={item.name}
                   onError={(e) => {
-                    e.target.src = "/placeholder-food.jpg";
+                    e.target.src = "/images/placeholder-food.jpg";
                   }}
                 />
                 {item.isRecommended && (
